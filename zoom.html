@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Image Zoom</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            html, body {
+                margin: 0;
+                padding: 0;
+                color: antiquewhite;
+                background-color: #483D8B;
+            }
+            h2 {
+                padding: 30px;
+                text-align: center;
+            }
+
+            .container {
+                padding: 15px;
+                display: flex;
+                flex-wrap: wrap;
+            }
+
+            .container div {
+                margin: 10px;
+            }
+
+            .pictures {
+                width: 64px;
+            }
+
+            .pictures img{
+                margin-bottom: 6px;
+            }
+
+            .picture {
+                position: relative;
+                width: 420px;
+                height: 606px;
+            }
+
+            img {
+                width: 100%;
+            }
+
+            .img-active {
+                box-shadow: 0 0 10px #fc2133, 0 0 10px #fc2133, 0 0 10px #fc2133;
+            }
+
+            .rect {
+                position: absolute;
+                margin: 0px !important;
+                padding: 0;
+                width: 200px;
+                height: 150px;
+                background-color: #78787c4d;
+                transform: translate(-50%, -50%);
+                pointer-events: none;
+                opacity: 0;
+            }
+
+
+            .zoom {
+                position: relative;
+                top: 100px;
+                left: 20px;
+                background-image: url('img/img1.webp');
+                box-shadow: 5px 5px 5px rgb(24, 24, 24);
+                opacity: 0;
+            }
+
+            .rect-active {
+                opacity: 1;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>Image Zoom effect</h2>
+        <div class="container">
+            <div class="pictures">
+                <img id="pic1" onmouseover="changeImage('img/img1.webp', 1)" src="img/img1.webp">
+                <img id="pic2" onmouseover="changeImage('img/img2.webp', 2)" src="img/img2.webp">
+                <img id="pic3" onmouseover="changeImage('img/img3.webp', 3)" src="img/img3.webp">
+                <img id="pic4" onmouseover="changeImage('img/img4.webp', 4)" src="img/img4.webp">
+                <img id="pic5" onmouseover="changeImage('img/img5.webp', 5)" src="img/img5.webp">
+                <img id="pic6" onmouseover="changeImage('img/img6.webp', 6)" src="img/img6.webp">
+            </div>
+            <div class="picture" id="picture">
+                <div class="rect" id="rect"></div>
+                <img id="pic" src="img/img1.webp">
+            </div>
+            <div class="zoom" id="zoom"></div>
+        </div>
+        <script>
+            // main picture
+            var picture = document.querySelector('#pic');
+
+            // side pictures
+            var picture1 = document.querySelector('#pic1');
+            var picture2 = document.querySelector('#pic2');
+            var picture3 = document.querySelector('#pic3');
+            var picture4 = document.querySelector('#pic4');
+            var picture5 = document.querySelector('#pic5');
+            var picture6 = document.querySelector('#pic6');
+
+            // Main picture container
+            var mainContainer = document.querySelector('#picture');
+
+            // selector
+            var rect = document.querySelector("#rect");
+
+            // Zoom window
+            var zoom = document.querySelector('#zoom');
+
+            // list of pictures 
+            picList = [picture1, picture2, picture3, picture4, picture5, picture6]
+
+            // Active side picture
+            let picActive = 1;
+
+            // Add a boxshodow to the first piture (Current active picture)
+            picture1.classList.add('img-active');
+
+            // change image 
+            function changeImage(imgSrc, n) {
+                // This will change the main image
+                picture.src = imgSrc;
+                // This will change the background image of the zoom window
+                zoom.style.backgroundImage = "url(" + imgSrc + ")";
+                // removing box shodow from the previous active side picture
+                picList[picActive-1].classList.remove('img-active');
+                // Add box shodow to active side picture
+                picList[n-1].classList.add('img-active');
+                // update the active side picture 
+                picActive = n;
+            }
+
+
+            // Width and height of main picture in px
+            let w1 = mainContainer.offsetWidth;
+            let h1 = mainContainer.offsetHeight;
+
+            // Zoom ratio
+            let ratio = 3;
+
+            // Zoom window background-image size
+            zoom.style.backgroundSize = w1 * ratio + 'px ' + h1 * ratio + 'px';
+
+            // Coordinates of mouse cursor
+            let x, y, xx, yy;
+
+            // Width and height of selector
+            let w2 = rect.offsetWidth;
+            let h2 = rect.offsetHeight;
+
+            // zoom window width and height
+            zoom.style.width = w2 * ratio + 'px';
+            zoom.style.height = h2 * ratio + 'px';
+
+            // half of selector shows outside the main picture
+            // We need half of width and height
+            w2 = w2/2;
+            h2 = h2/2;
+            // moving the selector box 
+            function move(event) {
+                // How far is the mouse cursor from an element
+                // x how far the cursor from left of element
+                x = event.offsetX;
+                // y how far the cursor from the top of an element
+                y = event.offsetY;
+
+                xx = x - w2;
+                yy = y - h2;
+                // Keeping the selector inside the main picture
+                // left of picture
+                if (x < w2) {
+                    x = w2;
+                    // matching the zoom window with the selector
+                    xx = 0;
+                }
+                // right of main picture
+                if (x > w1 - w2) {
+                    x = w1 - w2; 
+                    xx = x - w2;
+                }
+                // top of main picture 
+                if (y < h2) {
+                    y = h2;
+                    yy = 0;
+                } 
+                // bottom of main picture
+                if (y > h1 - h2) {
+                    y = h1 - h2;
+                }
+
+                xx = xx * ratio;
+                yy = yy * ratio;
+                // changing the position of the selector
+                rect.style.left = x + 'px';
+                rect.style.top = y + 'px';
+                // changing background image of zoom window
+                zoom.style.backgroundPosition = '-' + xx + 'px ' + '-' + yy + 'px';  
+            }
+
+            mainContainer.addEventListener('mousemove', function(){
+                move(event);
+                addOpacity();
+            })
+
+            // show selector
+            // show zoom window
+            function addOpacity() {
+                rect.classList.add('rect-active'); 
+                zoom.classList.add('rect-active');
+            }
+
+            // Hide the zoom window 
+            function removeOpacity() {
+                zoom.classList.remove('rect-active');
+            }
+
+            mainContainer.addEventListener('mouseout', function() {
+                removeOpacity(); 
+            })
+        </script>
+    </body>
+</html>
